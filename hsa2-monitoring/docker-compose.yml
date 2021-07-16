@@ -13,13 +13,8 @@ services:
       - MONGODB_ADDRESS=${MONGODB_ADDRESS}
       - ES_HOST=${ES_HOST}
       - ES_PORT=${ES_PORT}
-    command:
-      - /bin/sh
-      - -c
-      - |
-        echo "sleep for 15sec"
-        sleep 15
-        uvicorn webapp:app --host 0.0.0.0
+    command: ["uvicorn", "webapp:app", "--host", "0.0.0.0"]
+    restart: always
     ports:
       - 8000:8000
     networks:
@@ -52,7 +47,7 @@ services:
     volumes:
       # Data persistency
       # sudo mkdir -p /srv/docker/influxdb/data
-      - ./data/influxdb:/var/lib/influxdb
+      - ${DATA_PATH_HOST}/influxdb:/var/lib/influxdb
     networks:
       - backend
 
@@ -74,13 +69,11 @@ services:
     container_name: grafana
     ports:
       - "3000:3000"
-#    env_file:
-#      - 'env.grafana'
     user: "0"
     volumes:
       # Data persistency
       # sudo mkdir -p /srv/docker/grafana/data; chown 472:472 /srv/docker/grafana/data
-      - ./data/grafana:/var/lib/grafana
+      - ${DATA_PATH_HOST}/grafana:/var/lib/grafana
     links:
       - influxdb
     depends_on:
@@ -95,7 +88,7 @@ services:
         - ELK_VERSION=${ELK_VERSION}
     container_name: elasticsearch
     volumes:
-      - ./data/elasticsearch:/usr/share/elasticsearch/data
+      - ${DATA_PATH_HOST}/elasticsearch:/usr/share/elasticsearch/data
     environment:
       - cluster.name=test-cluster
       - node.name=test-node
