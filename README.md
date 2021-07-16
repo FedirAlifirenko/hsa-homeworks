@@ -19,6 +19,16 @@ ab -n 10000 -c 10 http://127.0.0.1:8000/items/60f176c4e16149fc16013e4b
 ab -n 10000 -c 10 http://127.0.0.1:8000/items
 ```
 
+### Testing ES docs query
+```
+ab -n 10000 -c 10 http://127.0.0.1:8000/search?q=world
+```
+
+### Testing POST of items
+```commandline
+ab -n 10000 -c 10 -p item.json -T application/json http://127.0.0.1:8000/items
+```
+
 
 ### Open Grafana to review containers metrics 
 http://localhost:3000
