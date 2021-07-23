@@ -13,7 +13,6 @@ services:
       - MONGODB_ADDRESS=${MONGODB_ADDRESS}
       - ES_HOST=${ES_HOST}
       - ES_PORT=${ES_PORT}
-    command: ["uvicorn", "webapp:app", "--host", "0.0.0.0"]
     restart: always
     ports:
       - 8000:8000
