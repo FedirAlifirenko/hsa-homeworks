@@ -1,0 +1,7 @@
+aioredis
+databases[mysql]
+fastapi
+PyMySQL
+simplejson
+sqlalchemy
+uvicorn[standard]

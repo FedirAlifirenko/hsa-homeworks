@@ -66,6 +66,8 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
+    environment:
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,briangann-gauge-panel,natel-plotly-panel,grafana-simple-json-datasource,grafana-piechart-panel
     ports:
       - "3000:3000"
     user: "0"

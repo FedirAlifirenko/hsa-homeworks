@@ -1,0 +1,82 @@
+version: '3.9'
+
+services:
+
+  mysql:
+    build:
+      context: ./mysql
+      args:
+        - MYSQL_VERSION=latest
+    environment:
+      - MYSQL_DATABASE=test-db
+      - MYSQL_USER=test-user
+      - MYSQL_PASSWORD=secret
+      - MYSQL_ROOT_PASSWORD=secret
+      - TZ=UTC
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - 3306:3306
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    volumes:
+      - ./data/redis:/data
+    ports:
+      - 6379:6379
+
+  webapp:
+    build: ./webapp
+    container_name: webapp
+    environment:
+      - WEB_CONCURRENCY=4
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=test-db
+      - MYSQL_USER=test-user
+      - MYSQL_PASSWORD=secret
+      - REDIS_URL=redis://@redis:6379/0
+    restart: always
+    command: ["uvicorn", "app:app", "--host", "0.0.0.0"]
+    volumes:
+      - ./webapp/app.py:/app/app.py
+    ports:
+      - 8000:8000
+    depends_on:
+      - redis
+      - mysql
+
+  influxdb:
+    image: influxdb:1.7
+    container_name: influxdb
+    ports:
+      - "8083:8083"
+      - "8086:8086"
+      - "8090:8090"
+      - "2003:2003"
+    volumes:
+      - ./data/influxdb:/var/lib/influxdb
+
+  telegraf:
+    image: telegraf:latest
+    container_name: telegraf
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf
+      - /var/run/docker.sock:/etc/telegraf/docker.sock
+    depends_on:
+      - influxdb
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,briangann-gauge-panel,natel-plotly-panel,grafana-simple-json-datasource,grafana-piechart-panel
+    ports:
+      - "3000:3000"
+    user: "0"
+    volumes:
+      - ./data/grafana:/var/lib/grafana
+    depends_on:
+      - influxdb
